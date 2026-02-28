@@ -1,0 +1,33 @@
+@use 'sass:color';
+@use '@/styles/variables.scss' as *;
+
+.colorButton {
+  min-width: 32px;
+  height: 32px;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+}
+
+.colorPalette {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  padding: $spacing-sm;
+  max-width: 200px;
+}
+
+.colorSwatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #e0e0e0;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+}

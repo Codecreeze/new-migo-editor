@@ -1,0 +1,13 @@
+@use 'sass:color';
+@use '@/styles/variables.scss' as *;
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+  min-height: 48px;
+}

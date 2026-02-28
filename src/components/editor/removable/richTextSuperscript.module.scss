@@ -1,0 +1,22 @@
+@use 'sass:color';
+
+$primary-color: #1976d2;
+$spacing-xs: 4px;
+
+.superscriptButton {
+  min-width: 32px;
+  height: 32px;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+}
+
+.active {
+  background-color: $primary-color;
+  color: #ffffff;
+
+  &:hover {
+    background-color: color.adjust($primary-color, $lightness: -10%);
+  }
+}

@@ -1,0 +1,22 @@
+@use 'sass:color';
+@use '@/styles/variables.scss' as *;
+
+.orderedListButton {
+  min-width: 32px;
+  height: 32px;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+}
+
+.active {
+  min-width: 32px;
+  height: 32px;
+  background-color: $primary-color;
+  color: #ffffff;
+
+  &:hover {
+    background-color: color.adjust($primary-color, $lightness: -10%);
+  }
+}

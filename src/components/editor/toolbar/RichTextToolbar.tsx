@@ -1,0 +1,117 @@
+import React from "react";
+import { Box } from "@mui/material";
+import {
+  RichTextUndo,
+  RichTextRedo,
+  RichTextSearchAndReplace,
+  RichTextClear,
+  RichTextFontFamily,
+  RichTextHeading,
+  RichTextFontSize,
+  RichTextBold,
+  RichTextItalic,
+  RichTextUnderline,
+  RichTextStrike,
+  RichTextSubscript,
+  RichTextSuperscript,
+  RichTextColor,
+  RichTextHighlight,
+  RichTextEmoji,
+  RichTextBulletList,
+  RichTextOrderedList,
+  RichTextTaskList,
+  RichTextAlignLeft,
+  RichTextAlignCenter,
+  RichTextAlignRight,
+  RichTextAlignJustify,
+  RichTextLineHeight,
+  RichTextLink,
+  RichTextImage,
+  RichTextVideo,
+  RichTextAttachment,
+  RichTextBlockquote,
+  RichTextHorizontalRule,
+  RichTextCode,
+  RichTextCodeBlock,
+  RichTextTable,
+  RichTextColumn,
+  RichTextCallout,
+  RichTextExportPdf,
+  RichTextThemeToggle,
+  Separator,
+} from "./index";
+
+export const RichTextToolbar: React.FC = () => {
+  return (
+    <React.Fragment>
+      {/* Toolbar */}
+      <Box className="meaxo-editor-toolbar">
+        {/* History & Search Group */}
+        <RichTextUndo />
+        <RichTextRedo />
+        <RichTextSearchAndReplace />
+        <RichTextClear />
+        <Separator />
+
+        {/* Typography Group */}
+        <RichTextFontSize />
+        <RichTextFontFamily />
+        <RichTextHeading />
+        <Separator />
+
+        {/* Text Formatting Group */}
+        <RichTextBold />
+        <RichTextItalic />
+        <RichTextUnderline />
+        <RichTextStrike />
+        <RichTextCode />
+        <RichTextSubscript />
+        <RichTextSuperscript />
+        <Separator />
+
+        {/* Alignment Group */}
+
+        <RichTextAlignLeft />
+        <RichTextAlignCenter />
+        <RichTextAlignRight />
+        <RichTextAlignJustify />
+        <RichTextLineHeight />
+        <Separator />
+
+        {/* Color & Styling Group */}
+        <RichTextEmoji />
+        <RichTextColor />
+        <RichTextHighlight />
+        <Separator />
+
+        {/* Lists Group */}
+        <RichTextBulletList />
+        <RichTextOrderedList />
+        <RichTextTaskList />
+        <Separator />
+
+        {/* Media & Links Group */}
+        <RichTextImage />
+        <RichTextVideo />
+        <RichTextLink />
+        <Separator />
+
+        {/* Content Blocks Group */}
+        <RichTextBlockquote />
+        <RichTextHorizontalRule />
+        <RichTextCodeBlock />
+        <RichTextTable />
+        <RichTextColumn />
+        <RichTextAttachment />
+        <RichTextCallout />
+        <Separator />
+
+        {/* Import/Export & Utilities Group */}
+        <RichTextExportPdf />
+        <RichTextThemeToggle />
+      </Box>
+    </React.Fragment>
+  );
+};
+
+export default RichTextToolbar;

@@ -1,0 +1,40 @@
+@use 'sass:color';
+@use '@/styles/variables.scss' as *;
+
+.emojiButton {
+  min-width: 32px;
+  height: 32px;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+}
+
+.emojiPalette {
+  max-width: 320px;
+}
+
+.emojiGrid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  padding: $spacing-sm;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.emojiItem {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+}

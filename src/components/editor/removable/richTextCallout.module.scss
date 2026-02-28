@@ -1,0 +1,9 @@
+.calloutButton {
+  color: #666;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #1976d2;
+    background-color: rgba(25, 118, 210, 0.04);
+  }
+}

@@ -1,0 +1,21 @@
+@use '@/styles/variables.scss' as *;
+
+.editorPage {
+  padding: $spacing-lg;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: $spacing-xl;
+}
+
+.content {
+  margin-top: $spacing-lg;
+}
+
+.templateCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}

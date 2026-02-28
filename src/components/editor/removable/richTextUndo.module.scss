@@ -1,0 +1,16 @@
+@use 'sass:color';
+@use '@/styles/variables.scss' as *;
+
+.undoButton {
+  min-width: 32px;
+  height: 32px;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

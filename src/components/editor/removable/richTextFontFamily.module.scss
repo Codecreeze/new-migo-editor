@@ -1,0 +1,14 @@
+@use 'sass:color';
+@use '@/styles/variables.scss' as *;
+
+.fontButton {
+  min-width: 100px;
+  text-transform: none;
+  font-size: 0.875rem;
+  padding: 4px 8px;
+  border-radius: $border-radius-sm;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+}

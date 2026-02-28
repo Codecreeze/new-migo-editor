@@ -1,0 +1,8 @@
+@use 'sass:color';
+@use '@/styles/variables.scss' as *;
+
+.separator {
+  height: 24px;
+  margin: 0 $spacing-xs;
+  background-color: #e0e0e0;
+}
