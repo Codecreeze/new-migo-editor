@@ -51,27 +51,6 @@ npm run build
 npm run preview
 ```
 
-## Default Users
-
-### Company Admin
-- Email: admin@company.com
-- Password: Admin@123
-
-### Project Manager
-- Email: manager@company.com
-- Password: Manager@123
-
-### Team Lead
-- Email: lead@company.com
-- Password: Lead@123
-
-### Employee
-- Email: employee@company.com
-- Password: Employee@123
-
-### Individual User
-- Email: john@individual.com
-- Password: John@123
 
 ## Roles & Permissions
 
