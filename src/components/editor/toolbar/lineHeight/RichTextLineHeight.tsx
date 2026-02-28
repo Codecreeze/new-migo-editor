@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
-import { MdArrowDropDown } from "react-icons/md";
+import { MdArrowDropDown, MdOutlineDone } from "react-icons/md";
 import { RiLineHeight } from "react-icons/ri";
 import { useRichTextEditor } from "../RichTextProvider";
 
@@ -56,15 +56,24 @@ export const RichTextLineHeight: React.FC = () => {
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}
       >
-        {LINE_HEIGHTS.map((height) => (
-          <MenuItem
-            key={height.value}
-            onClick={() => handleLineHeightChange(height.value)}
-            selected={getCurrentLineHeight() === height.value}
-          >
-            {height.label}
-          </MenuItem>
-        ))}
+        {LINE_HEIGHTS.map((height) => {
+          const isSelected = getCurrentLineHeight() === height.value;
+          return (
+            <MenuItem
+              key={height.value}
+              onClick={() => handleLineHeightChange(height.value)}
+              selected={isSelected}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              {isSelected && <MdOutlineDone size={16} />}
+              {height.label}
+            </MenuItem>
+          );
+        })}
       </Menu>
     </>
   );

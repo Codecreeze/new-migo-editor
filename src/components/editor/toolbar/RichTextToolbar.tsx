@@ -55,8 +55,8 @@ export const RichTextToolbar: React.FC = () => {
 
         {/* Typography Group */}
         <RichTextFontSize />
-        <RichTextFontFamily />
         <RichTextHeading />
+        <RichTextFontFamily />
         <Separator />
 
         {/* Text Formatting Group */}

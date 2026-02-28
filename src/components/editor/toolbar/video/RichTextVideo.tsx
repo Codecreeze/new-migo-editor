@@ -38,23 +38,27 @@ export const RichTextVideo: React.FC = () => {
           height: 480,
         }).run();
       } else if (videoUrl.startsWith('blob:')) {
-        // For local video files, insert as HTML video element with proper attributes
-        const videoHtml = `
-          <div style="text-align: center; margin: 16px 0;">
-            <video 
-              controls 
-              width="640" 
-              height="480" 
-              style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
-              preload="metadata"
-            >
-              <source src="${videoUrl}" type="video/mp4">
-              <source src="${videoUrl}" type="video/webm">
-              <source src="${videoUrl}" type="video/ogg">
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        `;
+        // For local video files, create a proper video element
+        const videoElement = document.createElement('video');
+        videoElement.src = videoUrl;
+        videoElement.controls = true;
+        videoElement.style.maxWidth = '100%';
+        videoElement.style.height = 'auto';
+        videoElement.style.borderRadius = '8px';
+        videoElement.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+        videoElement.preload = 'metadata';
+        
+        // Insert the video element directly
+        editor.chain().focus().insertContent({
+          type: 'paragraph',
+          content: [{
+            type: 'text',
+            text: ' '
+          }]
+        }).run();
+        
+        // Get the current position and insert HTML
+        const videoHtml = `<div style="text-align: center; margin: 16px 0;"><video src="${videoUrl}" controls style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" preload="metadata"></video></div>`;
         editor.chain().focus().insertContent(videoHtml).run();
       } else if (videoUrl.includes('vimeo.com')) {
         // Handle Vimeo URLs
@@ -64,20 +68,29 @@ export const RichTextVideo: React.FC = () => {
           editor.chain().focus().insertContent(vimeoHtml).run();
         }
       } else {
-        // For other video URLs, insert as iframe with better styling
-        const videoHtml = `
-          <div style="text-align: center; margin: 16px 0;">
-            <iframe 
-              src="${videoUrl}" 
-              width="640" 
-              height="480" 
-              frameborder="0" 
-              allowfullscreen
-              style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
-            ></iframe>
-          </div>
-        `;
-        editor.chain().focus().insertContent(videoHtml).run();
+        // For other video URLs, try to detect if it's a direct video file or embed URL
+        const isDirectVideo = /\.(mp4|webm|ogg|avi|mov|wmv|flv|mkv)(\?.*)?$/i.test(videoUrl);
+        
+        if (isDirectVideo) {
+          // Direct video file URL
+          const videoHtml = `<div style="text-align: center; margin: 16px 0;"><video src="${videoUrl}" controls style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" preload="metadata"></video></div>`;
+          editor.chain().focus().insertContent(videoHtml).run();
+        } else {
+          // Assume it's an embed URL for iframe
+          const videoHtml = `
+            <div style="text-align: center; margin: 16px 0;">
+              <iframe 
+                src="${videoUrl}" 
+                width="640" 
+                height="480" 
+                frameborder="0" 
+                allowfullscreen
+                style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+              ></iframe>
+            </div>
+          `;
+          editor.chain().focus().insertContent(videoHtml).run();
+        }
       }
     }
     setDialogOpen(false);

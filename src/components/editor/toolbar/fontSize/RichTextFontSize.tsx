@@ -5,6 +5,7 @@ import { useRichTextEditor } from "../RichTextProvider";
 
 
 const FONT_SIZES = [
+  { value: "17px", label: "Default", isDefault: true },
   { value: "12px", label: "12px" },
   { value: "14px", label: "14px" },
   { value: "16px", label: "16px" },
@@ -23,7 +24,13 @@ export const RichTextFontSize: React.FC = () => {
 
   const getCurrentFontSize = () => {
     const fontSize = editor.getAttributes("textStyle").fontSize;
-    return fontSize || "16px";
+    const currentSize = fontSize || "17px";
+    
+    // If current size is 16px, show "Default" in the button
+    if (currentSize === "17px") {
+      return "Default";
+    }
+    return currentSize;
   };
 
   const handleFontSizeChange = (fontSize: string) => {

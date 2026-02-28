@@ -3,10 +3,8 @@ import { IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
 import { MdArrowDropDown } from "react-icons/md";
 import { useRichTextEditor } from "../RichTextProvider";
 
-
 const FONT_FAMILIES = [
-  { value: "Inter", label: "Inter" },
-  { value: "Comic Sans MS", label: "Comic Sans MS, Comic Sans" },
+  { value: "Inter", label: "Inter", isDefault: true },
   { value: "serif", label: "serif" },
   { value: "cursive", label: "cursive" },
   { value: "Arial", label: "Arial" },
@@ -28,7 +26,12 @@ export const RichTextFontFamily: React.FC = () => {
 
   const getCurrentFont = () => {
     const fontFamily = editor.getAttributes("textStyle").fontFamily;
-    return fontFamily || "Inter";
+    const currentFont = fontFamily || "Inter";
+
+    if (currentFont === "Inter") {
+      return "Default";
+    }
+    return currentFont;
   };
 
   const handleFontChange = (fontFamily: string) => {

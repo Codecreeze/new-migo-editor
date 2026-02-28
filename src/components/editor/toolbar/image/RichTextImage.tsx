@@ -1,18 +1,31 @@
-import React, { useState, useRef } from 'react';
-import { IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Tabs, Tab, Box } from '@mui/material';
-import { RiImageAiLine } from 'react-icons/ri';
-import { useRichTextEditor } from '../RichTextProvider';
-
+import React, { useState, useRef } from "react";
+import {
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Tabs,
+  Tab,
+  Box,
+} from "@mui/material";
+import { RiImageAiLine } from "react-icons/ri";
+import { useRichTextEditor } from "../RichTextProvider";
 
 export const RichTextImage: React.FC = () => {
   const editor = useRichTextEditor();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imageTab, setImageTab] = useState(0);
-  const [imageUrl, setImageUrl] = useState('');
-  const [imageAlt, setImageAlt] = useState('');
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageAlt, setImageAlt] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -29,8 +42,8 @@ export const RichTextImage: React.FC = () => {
       editor.chain().focus().setImage({ src: imageUrl, alt: imageAlt }).run();
     }
     setDialogOpen(false);
-    setImageUrl('');
-    setImageAlt('');
+    setImageUrl("");
+    setImageAlt("");
   };
 
   const handleFileUploadClick = () => {
@@ -40,18 +53,15 @@ export const RichTextImage: React.FC = () => {
   return (
     <>
       <Tooltip title="Insert Image" arrow>
-        <IconButton
-          size="small"
-          onClick={() => setDialogOpen(true)}
-        >
+        <IconButton size="small" onClick={() => setDialogOpen(true)}>
           <RiImageAiLine />
         </IconButton>
       </Tooltip>
 
-      <Dialog 
-        open={dialogOpen} 
-        onClose={() => setDialogOpen(false)} 
-        maxWidth="sm" 
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        maxWidth="sm"
         fullWidth
         aria-labelledby="image-dialog-title"
         aria-describedby="image-dialog-description"
@@ -59,7 +69,11 @@ export const RichTextImage: React.FC = () => {
       >
         <DialogTitle id="image-dialog-title">Insert Image</DialogTitle>
         <DialogContent id="image-dialog-description">
-          <Tabs value={imageTab} onChange={(_, newValue) => setImageTab(newValue)} sx={{ mb: 2 }}>
+          <Tabs
+            value={imageTab}
+            onChange={(_, newValue) => setImageTab(newValue)}
+            sx={{ mb: 2 }}
+          >
             <Tab label="Upload File" />
             <Tab label="URL" />
           </Tabs>
@@ -78,15 +92,19 @@ export const RichTextImage: React.FC = () => {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 onChange={handleImageFileChange}
               />
               {imageUrl && (
-                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Box sx={{ mt: 2, textAlign: "center" }}>
                   <img
                     src={imageUrl}
                     alt="Preview"
-                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px' }}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "200px",
+                      borderRadius: "4px",
+                    }}
                   />
                 </Box>
               )}
@@ -94,16 +112,38 @@ export const RichTextImage: React.FC = () => {
           )}
 
           {imageTab === 1 && (
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Image URL"
-              fullWidth
-              variant="outlined"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://example.com/image.jpg"
-            />
+            <Box sx={{ mt: 2 }}>
+              <TextField
+                autoFocus
+                margin="dense"
+                label="Image URL"
+                fullWidth
+                variant="outlined"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://example.com/image.jpg"
+              />
+              {imageUrl && (
+                <Box sx={{ mt: 2, textAlign: "center", justifyContent: "center" }}>
+                  <img
+                    src={imageUrl}
+                    alt="Preview"
+                    style={{
+                      maxWidth: "100px",
+                      maxHeight: "100px",
+                      borderRadius: "4px",
+                    }}
+                    onError={(e) => {
+                      console.error("Image failed to load:", imageUrl);
+                      e.currentTarget.style.display = "none";
+                    }}
+                    onLoad={(e) => {
+                      e.currentTarget.style.display = "block";
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
           )}
 
           <TextField
@@ -117,8 +157,18 @@ export const RichTextImage: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)} aria-label="Cancel image insertion">Cancel</Button>
-          <Button onClick={handleInsertImage} variant="contained" disabled={!imageUrl} aria-label="Insert image into editor">
+          <Button
+            onClick={() => setDialogOpen(false)}
+            aria-label="Cancel image insertion"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleInsertImage}
+            variant="contained"
+            disabled={!imageUrl}
+            aria-label="Insert image into editor"
+          >
             Insert
           </Button>
         </DialogActions>
