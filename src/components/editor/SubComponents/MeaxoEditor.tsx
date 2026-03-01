@@ -1,29 +1,36 @@
 import React from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
+import { Extension } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
 import Highlight from "@tiptap/extension-highlight";
 import { TextStyle } from "@tiptap/extension-text-style";
-import { Color } from "@tiptap/extension-color";
-import { Table } from "@tiptap/extension-table";
-import { TableRow } from "@tiptap/extension-table-row";
-import { TableCell } from "@tiptap/extension-table-cell";
-import { TableHeader } from "@tiptap/extension-table-header";
-import { Image } from "@tiptap/extension-image";
-import { TaskList } from "@tiptap/extension-task-list";
-import { TaskItem } from "@tiptap/extension-task-item";
-import { FontFamily } from "@tiptap/extension-font-family";
+import Color from "@tiptap/extension-color";
+import FontFamily from "@tiptap/extension-font-family";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table } from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableHeader from "@tiptap/extension-table-header";
+import TableCell from "@tiptap/extension-table-cell";
+import Image from "@tiptap/extension-image";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
 import Typography from "@tiptap/extension-typography";
 import Youtube from "@tiptap/extension-youtube";
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import Strike from "@tiptap/extension-strike";
-import { Extension } from "@tiptap/core";
 import { Callout } from "../extensions/CalloutNode";
-import { RichTextProvider, RichTextToolbar, useRichTextTheme } from "../toolbar";
+import { Video } from "../extensions/VideoNode";
+import { ColumnsExtension } from "../extensions/ColumnsExtension";
+import SearchAndReplace from "../toolbar/searchAndReplace/SearchExtension";
+import {
+  RichTextProvider,
+  RichTextToolbar,
+  useRichTextTheme,
+} from "../toolbar";
 import { MeaxoEditorStyles } from "./style";
 import { Box } from "@mui/material";
 
@@ -199,6 +206,7 @@ export const MeaxoEditor: React.FC<MeaxoEditorProps> = ({
       TableRow,
       TableHeader,
       TableCell,
+      ColumnsExtension,
       Image.configure({
         inline: true,
         allowBase64: true,
@@ -215,10 +223,12 @@ export const MeaxoEditor: React.FC<MeaxoEditorProps> = ({
         controls: false,
         nocookie: true,
       }),
+      Video,
       Subscript,
       Superscript,
       Strike,
-      Callout,
+      Callout,      
+      SearchAndReplace,
     ],
     content,
     onUpdate: ({ editor }: { editor: any }) => {

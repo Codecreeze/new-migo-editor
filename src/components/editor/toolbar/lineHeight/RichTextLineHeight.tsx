@@ -66,11 +66,16 @@ export const RichTextLineHeight: React.FC = () => {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1
+                justifyContent: 'space-between',
+                minWidth: '120px',
+                paddingLeft: 2,
+                paddingRight: 2
               }}
             >
-              {isSelected && <MdOutlineDone size={16} />}
-              {height.label}
+              <span>{height.label}</span>
+              <div style={{ width: '16px', display: 'flex', justifyContent: 'center' }}>
+                {isSelected && <MdOutlineDone size={16} />}
+              </div>
             </MenuItem>
           );
         })}

@@ -41,7 +41,6 @@ export { RichTextLineHeight } from './lineHeight/RichTextLineHeight';
 export { RichTextLink } from './link/RichTextLink';
 export { RichTextImage } from './image/RichTextImage';
 export { RichTextVideo } from './video/RichTextVideo';
-export { RichTextAttachment } from './attachment/RichTextAttachment';
 
 // Content Blocks Components
 export { RichTextBlockquote } from './blockquote/RichTextBlockquote';

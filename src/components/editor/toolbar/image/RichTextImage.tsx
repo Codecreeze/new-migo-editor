@@ -3,16 +3,18 @@ import {
   IconButton,
   Tooltip,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
   Button,
   TextField,
+  Box,
+  Typography,
+  FormControlLabel,
+  Checkbox,
   Tabs,
   Tab,
-  Box,
 } from "@mui/material";
 import { RiImageAiLine } from "react-icons/ri";
+import { MdClose } from "react-icons/md";
 import { useRichTextEditor } from "../RichTextProvider";
 
 export const RichTextImage: React.FC = () => {
@@ -31,7 +33,12 @@ export const RichTextImage: React.FC = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const base64 = e.target?.result as string;
-        setImageUrl(base64);
+        // Insert image directly into editor
+        editor.chain().focus().setImage({ src: base64, alt: imageAlt }).run();
+        // Close dialog and reset
+        setDialogOpen(false);
+        setImageUrl("");
+        setImageAlt("");
       };
       reader.readAsDataURL(file);
     }
@@ -40,10 +47,10 @@ export const RichTextImage: React.FC = () => {
   const handleInsertImage = () => {
     if (imageUrl) {
       editor.chain().focus().setImage({ src: imageUrl, alt: imageAlt }).run();
+      setDialogOpen(false);
+      setImageUrl("");
+      setImageAlt("");
     }
-    setDialogOpen(false);
-    setImageUrl("");
-    setImageAlt("");
   };
 
   const handleFileUploadClick = () => {
@@ -61,117 +68,297 @@ export const RichTextImage: React.FC = () => {
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-        aria-labelledby="image-dialog-title"
-        aria-describedby="image-dialog-description"
+        maxWidth="xs"
+        slotProps={{
+          paper: {
+            sx: {
+              width: "500px",
+              maxWidth: "500px",
+              maxHeight: "350px",
+              borderRadius: "16px",
+              padding: "24px",
+            },
+          },
+        }}
         disableEnforceFocus
       >
-        <DialogTitle id="image-dialog-title">Insert Image</DialogTitle>
-        <DialogContent id="image-dialog-description">
-          <Tabs
-            value={imageTab}
-            onChange={(_, newValue) => setImageTab(newValue)}
-            sx={{ mb: 2 }}
-          >
-            <Tab label="Upload File" />
-            <Tab label="URL" />
-          </Tabs>
-
-          {imageTab === 0 && (
-            <Box sx={{ mt: 2 }}>
-              <Button
-                variant="outlined"
-                onClick={handleFileUploadClick}
-                fullWidth
-                sx={{ mb: 2 }}
+        <DialogContent sx={{ padding: 0 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {/* Header */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, fontSize: "18px", color: "#333" }}
               >
-                Choose Image File
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleImageFileChange}
-              />
-              {imageUrl && (
-                <Box sx={{ mt: 2, textAlign: "center" }}>
-                  <img
-                    src={imageUrl}
-                    alt="Preview"
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "200px",
-                      borderRadius: "4px",
+                Add an image
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => setDialogOpen(false)}
+                sx={{ padding: "4px" }}
+              >
+                <MdClose size={20} />
+              </IconButton>
+            </Box>
+
+            {/* Tab Selection with 3D MUI Tabs */}
+            <Tabs
+              value={imageTab}
+              onChange={(_, newValue) => setImageTab(newValue)}
+              sx={{
+                "& .MuiTabs-root": {
+                  minHeight: "36px",
+                },
+                "& .MuiTabs-flexContainer": {
+                  gap: "4px",
+                  padding: "5px",
+                },
+                "& .MuiTab-root": {
+                  flex: 1,
+                  minHeight: "36px",
+                  padding: "6px 12px",
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  fontWeight: 500,
+                  fontSize: "13px",
+                  color: "#333",
+                  backgroundColor: "#f8f9fa",
+                  boxShadow:
+                    "0 1px 2px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2)",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    backgroundColor: "#e9ecef",
+                    boxShadow:
+                      "0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3)",
+                    transform: "translateY(-1px)",
+                  },
+                  "&.Mui-selected": {
+                    backgroundColor: "#333",
+                    color: "white",
+                    border: "none",
+                    boxShadow:
+                      "inset 0 1px 2px rgba(0,0,0,0.3), 0 1px 1px rgba(0,0,0,0.2)",
+                    transform: "translateY(1px)",
+                  },
+                },
+                "& .MuiTabs-indicator": {
+                  display: "none",
+                },
+              }}
+            >
+              <Tab label="Upload" />
+              <Tab label="Url" />
+            </Tabs>
+
+            {/* Upload Tab */}
+            {imageTab === 0 && (
+              <>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      defaultChecked={false}
+                      size="small"
+                      sx={{
+                        color: "#ff6b35",
+                        "&.Mui-checked": { color: "#ff6b35" },
+                        padding: 0,
+                      }}
+                    />
+                  }
+                  label="Inline"
+                  sx={{
+                    "& .MuiFormControlLabel-label": {
+                      fontSize: "14px",
+                      color: "#333",
+                    },
+                    margin: "2px 0",
+                    gap: "8px",
+                    width: "max-content",
+                  }}
+                />
+
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={imageAlt}
+                  onChange={(e) => setImageAlt(e.target.value)}
+                  placeholder="Alt Text"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                      height: "48px",
+                      backgroundColor: "#f8f9fa",
+                      border: "2px solid #e9ecef",
+                      "&:hover": { borderColor: "#dee2e6" },
+                      "&.Mui-focused": {
+                        borderColor: "#ff6b35",
+                        backgroundColor: "#fff",
+                      },
+                    },
+                    "& .MuiOutlinedInput-input": {
+                      padding: "12px 16px",
+                      fontSize: "14px",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                  }}
+                />
+
+                <Box sx={{ display: "flex", gap: 2 }}>
+                  <Button
+                    fullWidth
+                    onClick={handleFileUploadClick}
+                    sx={{
+                      backgroundColor: "#ff6b35",
+                      color: "white",
+                      fontWeight: 600,
+                      fontSize: "16px",
+                      borderRadius: "12px",
+                      height: "48px",
+                      textTransform: "none",
+                      "&:hover": { backgroundColor: "#e55a2b" },
+                    }}
+                  >
+                    Upload
+                  </Button>
+                  <Button
+                    fullWidth
+                    onClick={handleFileUploadClick}
+                    sx={{
+                      backgroundColor: "#ff6b35",
+                      color: "white",
+                      fontWeight: 600,
+                      fontSize: "16px",
+                      borderRadius: "12px",
+                      height: "48px",
+                      textTransform: "none",
+                      "&:hover": { backgroundColor: "#e55a2b" },
+                    }}
+                  >
+                    Upload & Crop
+                  </Button>
+                </Box>
+              </>
+            )}
+
+            {/* URL Tab */}
+            {imageTab === 1 && (
+              <>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      defaultChecked={false}
+                      size="small"
+                      sx={{
+                        color: "#ff6b35",
+                        "&.Mui-checked": { color: "#ff6b35" },
+                      }}
+                    />
+                  }
+                  label="Inline"
+                  sx={{
+                    "& .MuiFormControlLabel-label": {
+                      fontSize: "14px",
+                      color: "#333",
+                    },
+                    margin: "2px 0",
+                    gap: "8px",
+                    width: "max-content",
+                  }}
+                />
+
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={imageAlt}
+                  onChange={(e) => setImageAlt(e.target.value)}
+                  placeholder=""
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                      height: "48px",
+                      backgroundColor: "#f8f9fa",
+                      border: "2px solid #e9ecef",
+                      "&:hover": { borderColor: "#dee2e6" },
+                      "&.Mui-focused": {
+                        borderColor: "#ff6b35",
+                        backgroundColor: "#fff",
+                      },
+                    },
+                    "& .MuiOutlinedInput-input": {
+                      padding: "12px 16px",
+                      fontSize: "14px",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                  }}
+                />
+
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="Link"
+                    sx={{
+                      flex: 1,
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "12px",
+                        height: "48px",
+                        backgroundColor: "#f8f9fa",
+                        border: "2px solid #e9ecef",
+                        "&:hover": { borderColor: "#dee2e6" },
+                        "&.Mui-focused": {
+                          borderColor: "#ff6b35",
+                          backgroundColor: "#fff",
+                        },
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        padding: "12px 16px",
+                        fontSize: "14px",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                     }}
                   />
+                  <Button
+                    onClick={handleInsertImage}
+                    disabled={!imageUrl.trim()}
+                    sx={{
+                      backgroundColor: "#ff6b35",
+                      color: "white",
+                      fontWeight: 600,
+                      fontSize: "16px",
+                      borderRadius: "12px",
+                      height: "48px",
+                      minWidth: "80px",
+                      textTransform: "none",
+                      "&:hover": { backgroundColor: "#e55a2b" },
+                      "&:disabled": {
+                        backgroundColor: "#e9ecef",
+                        color: "#6c757d",
+                      },
+                    }}
+                  >
+                    Apply
+                  </Button>
                 </Box>
-              )}
-            </Box>
-          )}
+              </>
+            )}
 
-          {imageTab === 1 && (
-            <Box sx={{ mt: 2 }}>
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Image URL"
-                fullWidth
-                variant="outlined"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
-              {imageUrl && (
-                <Box sx={{ mt: 2, textAlign: "center", justifyContent: "center" }}>
-                  <img
-                    src={imageUrl}
-                    alt="Preview"
-                    style={{
-                      maxWidth: "100px",
-                      maxHeight: "100px",
-                      borderRadius: "4px",
-                    }}
-                    onError={(e) => {
-                      console.error("Image failed to load:", imageUrl);
-                      e.currentTarget.style.display = "none";
-                    }}
-                    onLoad={(e) => {
-                      e.currentTarget.style.display = "block";
-                    }}
-                  />
-                </Box>
-              )}
-            </Box>
-          )}
-
-          <TextField
-            margin="dense"
-            label="Alt Text"
-            fullWidth
-            variant="outlined"
-            value={imageAlt}
-            onChange={(e) => setImageAlt(e.target.value)}
-            placeholder="Description of the image"
-          />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleImageFileChange}
+            />
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setDialogOpen(false)}
-            aria-label="Cancel image insertion"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleInsertImage}
-            variant="contained"
-            disabled={!imageUrl}
-            aria-label="Insert image into editor"
-          >
-            Insert
-          </Button>
-        </DialogActions>
       </Dialog>
     </>
   );

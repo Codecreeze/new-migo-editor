@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   IconButton,
   Tooltip,
@@ -12,7 +12,11 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import { LuReplace } from "react-icons/lu";
-import { MdKeyboardArrowUp, MdKeyboardArrowDown } from "react-icons/md";
+import {
+  MdKeyboardArrowUp,
+  MdKeyboardArrowDown,
+  MdClose,
+} from "react-icons/md";
 import { useRichTextEditor } from "../RichTextProvider";
 
 export const RichTextSearchAndReplace: React.FC = () => {
@@ -21,64 +25,115 @@ export const RichTextSearchAndReplace: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [replaceText, setReplaceText] = useState("");
   const [caseSensitive, setCaseSensitive] = useState(false);
-  const [currentMatch, setCurrentMatch] = useState(0);
-  const [totalMatches, setTotalMatches] = useState(0);
 
-  const handleSearch = () => {
-    if (!searchText) return;
-    const text = editor.getText();
-    // console.log('text', text)
-    const flags = caseSensitive ? "g" : "gi";
-    console.log('flags', flags)
-    const regex = new RegExp(searchText, flags);
-    console.log('regex', regex)
-    const matches = text.match(regex);
-    console.log('matches', matches);
-    if (matches) {
-      setTotalMatches(matches.length);
-      setCurrentMatch(1);
-    } else {
-      setTotalMatches(0);
-      setCurrentMatch(0);
-    }
-  };
+  // Read data directly from editor storage
+  const totalMatches =
+    (editor.storage as any)?.searchAndReplace?.totalMatches || 0;
+  const currentMatch =
+    ((editor.storage as any)?.searchAndReplace?.activeMatchIndex || 0) + 1;
+  const matches = (editor.storage as any)?.searchAndReplace?.matches || [];
+
+  const handleSearch = useCallback(
+    (searchTerm: string = searchText, useCaseSensitive: boolean = caseSensitive) => {
+      if (!searchTerm.trim()) {
+        (editor.commands as any).updateSearch({
+          searchTerm: "",
+          caseSensitive: useCaseSensitive,
+        });
+        return;
+      }
+
+      // Update search term and store replace term in extension storage
+      if ((editor.storage as any).searchAndReplace) {
+        (editor.storage as any).searchAndReplace.replaceTerm = replaceText;
+      }
+      (editor.commands as any).updateSearch({ searchTerm, caseSensitive: useCaseSensitive });
+    },
+    [editor, searchText, replaceText, caseSensitive],
+  );
 
   const handleResetSearch = () => {
     setSearchText("");
-    setCurrentMatch(0);
-    setTotalMatches(0);
+    setReplaceText("");
+    setCaseSensitive(false);
+    (editor.commands as any).updateSearch({
+      searchTerm: "",
+      caseSensitive: false,
+    });
+    // Clear storage completely
+    if ((editor.storage as any).searchAndReplace) {
+      (editor.storage as any).searchAndReplace.searchTerm = "";
+      (editor.storage as any).searchAndReplace.replaceTerm = "";
+      (editor.storage as any).searchAndReplace.matches = [];
+      (editor.storage as any).searchAndReplace.totalMatches = 0;
+      (editor.storage as any).searchAndReplace.activeMatchIndex = 0;
+    }
+  };
+
+
+  const handleClearOnly = () => {
+    setSearchText("");
+    setReplaceText("");
+    setCaseSensitive(false);
+    (editor.commands as any).updateSearch({
+      searchTerm: "",
+      caseSensitive: false,
+    });
+    // Clear storage completely
+    if ((editor.storage as any).searchAndReplace) {
+      (editor.storage as any).searchAndReplace.searchTerm = "";
+      (editor.storage as any).searchAndReplace.replaceTerm = "";
+      (editor.storage as any).searchAndReplace.matches = [];
+      (editor.storage as any).searchAndReplace.totalMatches = 0;
+      (editor.storage as any).searchAndReplace.activeMatchIndex = 0;
+    }
+  };
+
+  const handleDialogClose = () => {
+    handleResetSearch();
     setDialogOpen(false);
   };
 
   const handleReplace = () => {
     if (!searchText || !replaceText) return;
-    const html = editor.getHTML();
-    const flags = caseSensitive ? "g" : "gi";
-    const regex = new RegExp(searchText, flags);
-    const newHtml = html.replace(regex, replaceText);
-    editor.commands.setContent(newHtml);
-    handleResetSearch();
+
+    // Set replace term in storage before replacing
+    if ((editor.storage as any).searchAndReplace) {
+      (editor.storage as any).searchAndReplace.replaceTerm = replaceText;
+    }
+    (editor.commands as any).replaceFirst();
+
+    // Update search to refresh matches after replacement
+    (editor.commands as any).updateSearch({
+      searchTerm: searchText,
+      caseSensitive,
+    });
   };
 
   const handleReplaceAll = () => {
     if (!searchText || !replaceText) return;
-    const html = editor.getHTML();
-    const flags = caseSensitive ? "g" : "gi";
-    const regex = new RegExp(searchText, flags);
-    const newHtml = html.replace(regex, replaceText);
-    editor.commands.setContent(newHtml);
+
+    // Set replace term in storage before replacing
+    if ((editor.storage as any).searchAndReplace) {
+      (editor.storage as any).searchAndReplace.replaceTerm = replaceText;
+    }
+    (editor.commands as any).replaceAll();
+
+    // Clear search after replace all
     handleResetSearch();
   };
 
   const handlePrevious = () => {
-    if (currentMatch > 1) {
-      setCurrentMatch(currentMatch - 1);
+    if (matches.length > 0 && currentMatch > 1) {
+      const newIndex = (currentMatch - 2 + matches.length) % matches.length;
+      (editor.commands as any).setActiveMatch(newIndex);
     }
   };
 
   const handleNext = () => {
-    if (currentMatch < totalMatches) {
-      setCurrentMatch(currentMatch + 1);
+    if (matches.length > 0 && currentMatch < totalMatches) {
+      const newIndex = currentMatch % matches.length;
+      (editor.commands as any).setActiveMatch(newIndex);
     }
   };
 
@@ -92,7 +147,6 @@ export const RichTextSearchAndReplace: React.FC = () => {
 
       <Dialog
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
         maxWidth="xs"
         slotProps={{
           paper: {
@@ -121,14 +175,23 @@ export const RichTextSearchAndReplace: React.FC = () => {
                 variant="h6"
                 sx={{ fontWeight: 600, fontSize: "16px" }}
               >
-                Search
+                Search & Replace
               </Typography>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontSize: "14px" }}
-              >
-                {totalMatches > 0 ? `${currentMatch}/${totalMatches}` : "1/0"}
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "#666", fontSize: "14px" }}
+                >
+                  {totalMatches > 0 ? `${currentMatch}/${totalMatches}` : "0/0"}
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={handleDialogClose}
+                  sx={{ padding: "4px" }}
+                >
+                  <MdClose size={16} />
+                </IconButton>
+              </Box>
             </Box>
 
             {/* Search Input with Navigation */}
@@ -139,7 +202,7 @@ export const RichTextSearchAndReplace: React.FC = () => {
                 value={searchText}
                 onChange={(e) => {
                   setSearchText(e.target.value);
-                  if (e.target.value) handleSearch();
+                  handleSearch(e.target.value);
                 }}
                 placeholder="Text"
                 sx={{
@@ -196,11 +259,7 @@ export const RichTextSearchAndReplace: React.FC = () => {
                 </IconButton>
                 <Button
                   size="small"
-                  onClick={() => {
-                    setSearchText("");
-                    setCurrentMatch(0);
-                    setTotalMatches(0);
-                  }}
+                  onClick={handleClearOnly}
                   sx={{
                     minWidth: "48px",
                     height: "24px",
@@ -249,11 +308,19 @@ export const RichTextSearchAndReplace: React.FC = () => {
               control={
                 <Checkbox
                   checked={caseSensitive}
-                  onChange={(e) => setCaseSensitive(e.target.checked)}
+                  onChange={(e) => {
+                    const newCaseSensitive = e.target.checked;
+                    setCaseSensitive(newCaseSensitive);
+                    if (searchText.trim()) {
+                      handleSearch(searchText, newCaseSensitive);
+                    }
+                  }}
                   size="small"
                   sx={{
                     color: "#ff6b35",
-                    "&.Mui-checked": { color: "#ff6b35" },
+                    "&.Mui-checked": {
+                      color: "#ff6b35",
+                    },
                   }}
                 />
               }

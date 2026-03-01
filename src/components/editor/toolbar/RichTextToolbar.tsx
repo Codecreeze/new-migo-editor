@@ -16,7 +16,6 @@ import {
   RichTextSuperscript,
   RichTextColor,
   RichTextHighlight,
-  RichTextEmoji,
   RichTextBulletList,
   RichTextOrderedList,
   RichTextTaskList,
@@ -28,7 +27,6 @@ import {
   RichTextLink,
   RichTextImage,
   RichTextVideo,
-  RichTextAttachment,
   RichTextBlockquote,
   RichTextHorizontalRule,
   RichTextCode,
@@ -79,7 +77,6 @@ export const RichTextToolbar: React.FC = () => {
         <Separator />
 
         {/* Color & Styling Group */}
-        <RichTextEmoji />
         <RichTextColor />
         <RichTextHighlight />
         <Separator />
@@ -102,7 +99,6 @@ export const RichTextToolbar: React.FC = () => {
         <RichTextCodeBlock />
         <RichTextTable />
         <RichTextColumn />
-        <RichTextAttachment />
         <RichTextCallout />
         <Separator />
 
