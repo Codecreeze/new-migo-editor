@@ -88,9 +88,9 @@ export const RichTextToolbar: React.FC = () => {
         <Separator />
 
         {/* Media & Links Group */}
+        <RichTextLink />
         <RichTextImage />
         <RichTextVideo />
-        <RichTextLink />
         <Separator />
 
         {/* Content Blocks Group */}

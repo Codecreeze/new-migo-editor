@@ -1,21 +1,14 @@
 import React from "react";
-import { IconButton, Tooltip } from "@mui/material";
-import { useRichTextEditor } from "../RichTextProvider";
 import { HiOutlineStrikethrough } from "react-icons/hi2";
+import ToolbarMarkButton from "../shared/ToolbarMarkButton";
 
 export const RichTextStrike: React.FC = () => {
-  const editor = useRichTextEditor();
-
   return (
-    <Tooltip title="Strikethrough" arrow>
-      <IconButton
-        size="small"
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={editor.isActive("strike") ? "is-active" : ""}
-      >
-        <HiOutlineStrikethrough />
-      </IconButton>
-    </Tooltip>
+    <ToolbarMarkButton
+      mark="strike"
+      tooltip="Strikethrough"
+      icon={<HiOutlineStrikethrough />}
+    />
   );
 };
 

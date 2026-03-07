@@ -1,21 +1,14 @@
 import React from 'react';
-import { IconButton, Tooltip } from '@mui/material';
-import { useRichTextEditor } from '../RichTextProvider';
 import { SiCodecrafters } from "react-icons/si";
+import ToolbarMarkButton from '../shared/ToolbarMarkButton';
 
 export const RichTextCode: React.FC = () => {
-  const editor = useRichTextEditor();
-
   return (
-    <Tooltip title="Inline Code" arrow>
-      <IconButton
-        size="small"
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        className={editor.isActive('code') ? 'is-active' : ''}
-      >
-        <SiCodecrafters />
-      </IconButton>
-    </Tooltip>
+    <ToolbarMarkButton
+      mark="code"
+      tooltip="Inline Code"
+      icon={<SiCodecrafters />}
+    />
   );
 };
 

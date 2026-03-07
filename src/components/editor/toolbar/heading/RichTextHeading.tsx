@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
-import { MdArrowDropDown } from "react-icons/md";
+import React from "react";
+import { Select, MenuItem, FormControl, Tooltip } from "@mui/material";
 import { useRichTextEditor } from "../RichTextProvider";
 
 
@@ -16,113 +15,57 @@ const HEADING_LEVELS = [
 
 export const RichTextHeading: React.FC = () => {
   const editor = useRichTextEditor();
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const getCurrentHeading = () => {
     for (let i = 1; i <= 6; i++) {
       if (editor.isActive("heading", { level: i })) {
-        return `Heading ${i}`;
+        return `heading${i}`;
       }
     }
-    return "Paragraph";
+    return "paragraph";
   };
 
-  const handleHeadingChange = (level: number) => {
-    if (level === 0) {
-      editor.chain().focus().setParagraph().run();
-    } else {
-      editor
-        .chain()
-        .focus()
-        .toggleHeading({ level: level as 1 | 2 | 3 | 4 | 5 | 6 })
-        .run();
+  const handleHeadingChange = (event: any) => {
+    const value = event.target.value;
+    const heading = HEADING_LEVELS.find(h => h.value === value);
+    
+    if (heading) {
+      if (heading.level === 0) {
+        editor.chain().focus().setParagraph().run();
+      } else {
+        editor
+          .chain()
+          .focus()
+          .toggleHeading({ level: heading.level as 1 | 2 | 3 | 4 | 5 | 6 })
+          .run();
+      }
     }
-    setAnchorEl(null);
   };
 
   return (
-    <>
-      <Tooltip title="Heading" arrow>
-        <IconButton
-          size="small"
-          onClick={(e: React.MouseEvent<HTMLElement>) =>
-            setAnchorEl(e.currentTarget)
-          }
-          className="dropdown-button"
-        >
-          <Typography
-            variant="body2"
-            sx={{
+    <Tooltip title="Heading" arrow>
+      <FormControl size="small" sx={{ minWidth: 120 }}>
+        <Select
+          value={getCurrentHeading()}
+          onChange={handleHeadingChange}
+          displayEmpty
+          sx={{
+            fontSize: "12px",
+            height: "32px",
+            "& .MuiSelect-select": {
+              padding: "6px 8px",
               fontSize: "12px",
-              fontWeight: 500,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: "70px",
-              flex: 1,
-            }}
-          >
-            {getCurrentHeading()}
-          </Typography>
-          <MdArrowDropDown />
-        </IconButton>
-      </Tooltip>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-        PaperProps={{
-          style: {
-            maxHeight: 300,
-            width: "180px",
-          },
-        }}
-      >
-        {HEADING_LEVELS.map((heading) => (
-          <MenuItem
-            key={heading.value}
-            onClick={() => handleHeadingChange(heading.level)}
-            selected={
-              heading.level === 0
-                ? !editor.isActive("heading")
-                : editor.isActive("heading", { level: heading.level })
-            }
-            sx={{
-              fontSize:
-                heading.level === 0 ? "14px" : `${20 - heading.level * 2}px`,
-              fontWeight: heading.level === 0 ? 400 : 600,
-              fontFamily: "Inter, sans-serif",
-              "&:hover": {
-                backgroundColor: "#f5f5f5",
-              },
-            }}
-          >
-            <Typography
-              variant="body1"
-              sx={{
-                fontSize:
-                  heading.level === 0 ? "14px" : `${20 - heading.level * 2}px`,
-                fontWeight: heading.level === 0 ? 400 : 600,
-              }}
-            >
+            },
+          }}
+        >
+          {HEADING_LEVELS.map((heading) => (
+            <MenuItem key={heading.value} value={heading.value}>
               {heading.label}
-            </Typography>
-            {heading.level > 0 && (
-              <Typography
-                variant="caption"
-                sx={{
-                  marginLeft: "auto",
-                  color: "#666",
-                  fontSize: "12px",
-                }}
-              >
-                Alt Ctrl {heading.level}
-              </Typography>
-            )}
-          </MenuItem>
-        ))}
-      </Menu>
-    </>
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Tooltip>
   );
 };
 

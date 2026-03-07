@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
-import { MdArrowDropDown } from "react-icons/md";
+import React from "react";
+import { Select, MenuItem, FormControl, Tooltip } from "@mui/material";
 import { useRichTextEditor } from "../RichTextProvider";
 
 const FONT_FAMILIES = [
@@ -22,78 +21,41 @@ const FONT_FAMILIES = [
 
 export const RichTextFontFamily: React.FC = () => {
   const editor = useRichTextEditor();
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const getCurrentFont = () => {
     const fontFamily = editor.getAttributes("textStyle").fontFamily;
-    const currentFont = fontFamily || "Inter";
-
-    if (currentFont === "Inter") {
-      return "Default";
-    }
-    return currentFont;
+    return fontFamily || "Inter";
   };
 
-  const handleFontChange = (fontFamily: string) => {
+  const handleFontChange = (event: any) => {
+    const fontFamily = event.target.value;
     editor.chain().focus().setFontFamily(fontFamily).run();
-    setAnchorEl(null);
   };
 
   return (
-    <>
-      <Tooltip title="Font Family" arrow>
-        <IconButton
-          size="small"
-          onClick={(e: React.MouseEvent<HTMLElement>) =>
-            setAnchorEl(e.currentTarget)
-          }
-          className="dropdown-button"
-        >
-          <Typography
-            variant="body2"
-            sx={{
+    <Tooltip title="Font Family" arrow>
+      <FormControl size="small" sx={{ minWidth: 120 }}>
+        <Select
+          value={getCurrentFont()}
+          onChange={handleFontChange}
+          displayEmpty
+          sx={{
+            fontSize: "12px",
+            height: "32px",
+            "& .MuiSelect-select": {
+              padding: "6px 8px",
               fontSize: "12px",
-              fontWeight: 500,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: "40px",
-              flex: 1,
-            }}
-          >
-            {getCurrentFont()}
-          </Typography>
-          <MdArrowDropDown style={{ marginLeft: "4px", fontSize: "16px" }} />
-        </IconButton>
-      </Tooltip>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-        PaperProps={{
-          style: {
-            maxHeight: 300,
-            width: "200px",
-          },
-        }}
-      >
-        {FONT_FAMILIES.map((font) => (
-          <MenuItem
-            key={font.value}
-            onClick={() => handleFontChange(font.value)}
-            sx={{
-              fontSize: "14px",
-              fontFamily: "Inter, sans-serif", // Display all fonts in normal text
-              "&:hover": {
-                backgroundColor: "#f5f5f5",
-              },
-            }}
-          >
-            {font.label}
-          </MenuItem>
-        ))}
-      </Menu>
-    </>
+            },
+          }}
+        >
+          {FONT_FAMILIES.map((font) => (
+            <MenuItem key={font.value} value={font.value}>
+              {font.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Tooltip>
   );
 };
 

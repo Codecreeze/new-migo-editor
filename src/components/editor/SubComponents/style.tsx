@@ -250,14 +250,11 @@ export const MeaxoEditorStyles = ({
             },
             // Link
             "& a, & .custom-link": {
-              color: isDark ? "#4a9eff" : theme.palette.primary.main,
+              color: "#4a9eff",
               textDecoration: "underline",
-              cursor: "pointer",
               transition: "color 0.2s",
               "&:hover": {
-                color: isDark
-                  ? "#6bb6ff"
-                  : alpha(theme.palette.primary.main, 0.85),
+                color: "#6bb6ff",
               },
             },
             // Text formatting
@@ -335,16 +332,126 @@ export const MeaxoEditorStyles = ({
             },
             // Images
             "& img": {
-              maxWidth: "600px",
-              maxHeight: "600px",
-              height: "100%",
-              width: "100%",
+              maxWidth: "720px",
+              maxHeight: "800px",
+              minWidth: "100px",
+              minHeight: "100px",
+            },
+            // Enhanced Image Figures
+            "& .image-extended": {
               display: "block",
-              margin: `${theme.spacing(2)} auto`,
-              borderRadius: theme.shape.borderRadius,
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-              "&.ProseMirror-selectednode": {
-                outline: `3px solid ${theme.palette.primary.main}`,
+              margin: "1rem 0",
+              "& figure": {
+                margin: 0,
+                position: "relative",
+              },
+              "& img": {
+                borderRadius: theme.shape.borderRadius,
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                transition: "transform 0.2s ease",
+              },
+              "& figcaption": {
+                marginTop: theme.spacing(1),
+                padding: theme.spacing(1),
+                fontSize: "0.875rem",
+                color: isDark ? "#a0a0a0" : "#757575",
+                textAlign: "center",
+                fontStyle: "italic",
+                borderRadius: "4px",
+                minHeight: "1.5rem",
+                "&:focus": {
+                  outline: "none",
+                  backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                },
+                "&:empty::before": {
+                  content: '"Add caption..."',
+                  color: isDark ? "#666" : "#9ca3af",
+                },
+              },
+            },
+            // Image Node Wrapper Styles
+            "& .image-node-wrapper": {
+              position: "relative",
+              display: "inline-block",
+              "&.selected": {
+                "& img": {
+                  boxShadow: `0 0 0 2px ${theme.palette.primary.main}`,
+                },
+              },
+            },
+            // Column Layout Styles - Dynamic resizing based on actual column count
+            "& .meaxo-column-layout": {
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: "30px",
+              margin: "20px 0",
+              width: "100%",
+              maxWidth: "100%",
+              overflowX: "hidden",
+
+              // Force equal width columns regardless of content
+              "& > div[data-type='column']": {
+                minWidth: 0,
+                width: "100%",
+              },
+
+              // Dynamic column counts using :nth-of-type selectors for better responsiveness
+              "&:has(> div[data-type='column']:nth-of-type(1):nth-last-of-type(1))":
+                {
+                  gridTemplateColumns: "1fr",
+                },
+              "&:has(> div[data-type='column']:nth-of-type(2):nth-last-of-type(1))":
+                {
+                  gridTemplateColumns: "1fr 1fr",
+                },
+              "&:has(> div[data-type='column']:nth-of-type(3):nth-last-of-type(1))":
+                {
+                  gridTemplateColumns: "1fr 1fr 1fr",
+                },
+              "&:has(> div[data-type='column']:nth-of-type(4):nth-last-of-type(1))":
+                {
+                  gridTemplateColumns: "1fr 1fr 1fr 1fr",
+                },
+              "&:has(> div[data-type='column']:nth-of-type(5):nth-last-of-type(1))":
+                {
+                  gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
+                },
+            },
+            "& .meaxo-column-layout > div[data-type='column']": {
+              border: `2px solid ${theme.palette.divider}`,
+              borderRadius: "6px",
+              padding: "1rem",
+              background: isDark ? "#1e1e1e" : "white",
+              minHeight: "20px",
+              position: "relative",
+              width: "100% !important",
+              maxWidth: "100% !important",
+              minWidth: "0 !important",
+              overflowWrap: "break-word !important",
+              wordBreak: "break-word !important",
+              hyphens: "auto !important",
+              overflowX: "hidden !important",
+              overflowY: "auto !important",
+              "& > *": {
+                maxWidth: "100% !important",
+              },
+              "& img, & pre, & code, & table, & iframe": {
+                maxWidth: "100% !important",
+                height: "auto !important",
+              },
+              "& pre, & code": {
+                whiteSpace: "pre-wrap !important",
+                wordBreak: "break-all !important",
+              },
+              "& table": {
+                width: "100% !important",
+                tableLayout: "fixed !important",
+              },
+              "&:focus-within": {
+                borderColor: "#ef4444",
+              },
+              "& p:first-of-type": {
+                margin: 0,
               },
             },
             // Task Lists

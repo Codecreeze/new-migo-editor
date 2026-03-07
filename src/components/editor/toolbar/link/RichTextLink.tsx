@@ -12,12 +12,60 @@ import {
 import { FiLink } from "react-icons/fi";
 import { MdClose } from "react-icons/md";
 import { useRichTextEditor } from "../RichTextProvider";
+import LinkBubbleMenu from "./LinkBubbleMenu";
 
 export const RichTextLink: React.FC = () => {
   const editor = useRichTextEditor();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkText, setLinkText] = useState("");
+
+  // Helper: Get link range and text when cursor is inside
+  const getCurrentLinkInfo = () => {
+    const { state } = editor;
+    const { from, to } = state.selection;
+
+    if (!state.selection.empty) {
+      return {
+        text: state.doc.textBetween(from, to, " ").trim(),
+        href: editor.getAttributes("link")?.href || "",
+      };
+    }
+
+    const $pos = state.doc.resolve(from);
+    const linkMark = $pos.marks().find((m) => m.type.name === "link");
+
+    if (!linkMark) {
+      return { text: "", href: "" };
+    }
+
+    let start = from;
+    while (start > $pos.start($pos.depth)) {
+      const prev = state.doc.resolve(start - 1);
+      if (!prev.marks().some((m) => m.eq(linkMark))) break;
+      start = prev.pos;
+    }
+
+    let end = from;
+    while (end < $pos.end($pos.depth)) {
+      const next = state.doc.resolve(end + 1);
+      if (!next.marks().some((m) => m.eq(linkMark))) break;
+      end = next.pos;
+    }
+
+    return {
+      text: state.doc.textBetween(start, end, " ").trim(),
+      href: linkMark.attrs.href || "",
+    };
+  };
+
+  // Then in openLinkDialog:
+  const openLinkDialog = () => {
+    const { text, href } = getCurrentLinkInfo();
+    setLinkText(text);
+    setLinkUrl(href);
+    setDialogOpen(true);
+  };
 
   const handleSetLink = () => {
     if (linkUrl === "") {
@@ -48,7 +96,7 @@ export const RichTextLink: React.FC = () => {
       <Tooltip title="Insert Link" arrow>
         <IconButton
           size="small"
-          onClick={() => setDialogOpen(true)}
+          onClick={openLinkDialog}
           className={editor.isActive("link") ? "is-active" : ""}
         >
           <FiLink />
@@ -197,6 +245,7 @@ export const RichTextLink: React.FC = () => {
           </Box>
         </DialogContent>
       </Dialog>
+      <LinkBubbleMenu editor={editor} onEditLink={openLinkDialog} />
     </>
   );
 };

@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
-import { Extension } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
@@ -14,17 +13,17 @@ import { Table } from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableHeader from "@tiptap/extension-table-header";
 import TableCell from "@tiptap/extension-table-cell";
-import Image from "@tiptap/extension-image";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Typography from "@tiptap/extension-typography";
-import Youtube from "@tiptap/extension-youtube";
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import Strike from "@tiptap/extension-strike";
 import { Callout } from "../extensions/CalloutNode";
 import { Video } from "../extensions/VideoNode";
-import { ColumnsExtension } from "../extensions/ColumnsExtension";
+import { Columns, Column } from "../extensions/NewColumnsExtension";
+import { FontSize } from "../extensions/FontSizeExtension";
+import { LineHeight } from "../extensions/LineHeightExtension";
 import SearchAndReplace from "../toolbar/searchAndReplace/SearchExtension";
 import {
   RichTextProvider,
@@ -33,6 +32,8 @@ import {
 } from "../toolbar";
 import { MeaxoEditorStyles } from "./style";
 import { Box } from "@mui/material";
+import CustomImage from "../extensions/CustomImage";
+import ImageExtended from "../extensions/ImageExtended";
 
 // Wrapper component to access theme context
 const MeaxoEditorStylesWrapper = () => {
@@ -40,128 +41,18 @@ const MeaxoEditorStylesWrapper = () => {
   return <MeaxoEditorStyles themeMode={themeMode} />;
 };
 
-// Custom Font Size Extension using TextStyle
-declare module "@tiptap/core" {
-  interface Commands<ReturnType> {
-    fontSize: {
-      setFontSize: (fontSize: string) => ReturnType;
-      unsetFontSize: () => ReturnType;
-    };
-  }
-}
-
-const FontSize = Extension.create({
-  name: "fontSize",
-  addOptions() {
-    return {
-      types: ["textStyle"],
-    };
-  },
-  addGlobalAttributes() {
-    return [
-      {
-        types: this.options.types,
-        attributes: {
-          fontSize: {
-            default: null,
-            parseHTML: (element: HTMLElement) =>
-              element.style.fontSize?.replace(/['"]+/g, ""),
-            renderHTML: (attributes: Record<string, any>) => {
-              if (!attributes.fontSize) {
-                return {};
-              }
-              return {
-                style: `font-size: ${attributes.fontSize}`,
-              };
-            },
-          },
-        },
-      },
-    ];
-  },
-  addCommands() {
-    return {
-      setFontSize:
-        (fontSize: string) =>
-        ({ chain }: any) => {
-          return chain().setMark("textStyle", { fontSize }).run();
-        },
-      unsetFontSize:
-        () =>
-        ({ chain }: any) => {
-          return chain()
-            .setMark("textStyle", { fontSize: null })
-            .removeEmptyTextStyle()
-            .run();
-        },
-    };
-  },
-});
-
-// Custom Line Height Extension
-const LineHeight = Extension.create({
-  name: "lineHeight",
-  addOptions() {
-    return {
-      types: ["paragraph", "heading"],
-      defaultLineHeight: "1.5",
-    };
-  },
-  addGlobalAttributes() {
-    return [
-      {
-        types: this.options.types,
-        attributes: {
-          lineHeight: {
-            default: this.options.defaultLineHeight,
-            parseHTML: (element: HTMLElement) =>
-              element.style.lineHeight || this.options.defaultLineHeight,
-            renderHTML: (attributes: Record<string, any>) => {
-              if (!attributes.lineHeight) {
-                return {};
-              }
-              return {
-                style: `line-height: ${attributes.lineHeight}`,
-              };
-            },
-          },
-        },
-      },
-    ];
-  },
-  addCommands() {
-    return {
-      setLineHeight:
-        (lineHeight: string) =>
-        ({ commands }: any) => {
-          return this.options.types.every((type: string) =>
-            commands.updateAttributes(type, { lineHeight }),
-          );
-        },
-      unsetLineHeight:
-        () =>
-        ({ commands }: any) => {
-          return this.options.types.every((type: string) =>
-            commands.resetAttributes(type, "lineHeight"),
-          );
-        },
-    };
-  },
-});
-
 interface MeaxoEditorProps {
   content?: string;
   onChange?: (html: string) => void;
   placeholder?: string;
 }
 
-export const MeaxoEditor: React.FC<MeaxoEditorProps> = ({
-  content = "",
-  onChange,
-  placeholder = "Start writing...",
-}) => {
-  const editor = useEditor({
-    extensions: [
+export const MeaxoEditor: React.FC<MeaxoEditorProps> = (props) => {
+  const { content = "", onChange, placeholder = "Start writing..." } = props;
+
+  const extensions = useMemo(
+    () => [
+      // History & search tools
       StarterKit.configure({
         bulletList: {
           keepMarks: true,
@@ -175,67 +66,89 @@ export const MeaxoEditor: React.FC<MeaxoEditorProps> = ({
         strike: false, // Disable built-in strike to avoid duplicate
         underline: false, // Disable built-in underline to avoid duplicate
       }),
+      SearchAndReplace,
+
+      // Typography
+      TextStyle,
+      FontSize,
+      FontFamily.configure({
+        types: ["textStyle"],
+      }),
+
+      // Text formatting
       Underline,
+      Strike,
+      Subscript,
+      Superscript,
+      Typography,
+
+      // Alignment & spacing
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
+      LineHeight.configure({
+        types: ["paragraph", "heading"],
+      }),
+
+      // Color & highlight
+      Color,
+      Highlight.configure({
+        multicolor: true,
+      }),
+
+      // Lists
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
+
+      // Media & links
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
           class: "custom-link",
         },
       }),
-      Highlight.configure({
-        multicolor: true,
-      }),
-      TextStyle,
-      Color,
-      FontFamily.configure({
-        types: ["textStyle"],
-      }),
-      FontSize,
-      LineHeight.configure({
-        types: ["paragraph", "heading"],
-      }),
-      Placeholder.configure({
-        placeholder,
-      }),
-      Table.configure({
-        resizable: true,
-      }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      ColumnsExtension,
-      Image.configure({
+      CustomImage.configure({
         inline: true,
         allowBase64: true,
         HTMLAttributes: {
           class: "custom-image",
         },
       }),
-      TaskList,
-      TaskItem.configure({
-        nested: true,
-      }),
-      Typography,
-      Youtube.configure({
-        controls: false,
-        nocookie: true,
+      ImageExtended.configure({
+        HTMLAttributes: {
+          class: "image-extended",
+        },
       }),
       Video,
-      Subscript,
-      Superscript,
-      Strike,
-      Callout,      
-      SearchAndReplace,
+
+      // Content blocks
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      Columns,
+      Column,
+      Callout,
+
+      // Utilities
+      Placeholder.configure({
+        placeholder,
+      }),
     ],
+    [placeholder],
+  );
+
+  const editor = useEditor({
+    extensions,
     content,
     onUpdate: ({ editor }: { editor: any }) => {
       const html = editor.getHTML();
       onChange?.(html);
     },
-    shouldRerenderOnTransaction: true,
     immediatelyRender: true,
     editorProps: {
       attributes: {

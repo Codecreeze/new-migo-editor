@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
-import { MdArrowDropDown } from "react-icons/md";
+import React from "react";
+import { Select, MenuItem, FormControl, Tooltip } from "@mui/material";
 import { useRichTextEditor } from "../RichTextProvider";
 
 
@@ -20,79 +19,41 @@ const FONT_SIZES = [
 
 export const RichTextFontSize: React.FC = () => {
   const editor = useRichTextEditor();
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const getCurrentFontSize = () => {
     const fontSize = editor.getAttributes("textStyle").fontSize;
-    const currentSize = fontSize || "17px";
-    
-    // If current size is 16px, show "Default" in the button
-    if (currentSize === "17px") {
-      return "Default";
-    }
-    return currentSize;
+    return fontSize || "17px";
   };
 
-  const handleFontSizeChange = (fontSize: string) => {
+  const handleFontSizeChange = (event: any) => {
+    const fontSize = event.target.value;
     editor.chain().focus().setMark("textStyle", { fontSize }).run();
-    setAnchorEl(null);
   };
 
   return (
-    <>
-      <Tooltip title="Font Size" arrow>
-        <IconButton
-          size="small"
-          onClick={(e: React.MouseEvent<HTMLElement>) =>
-            setAnchorEl(e.currentTarget)
-          }
-          className="dropdown-button"
-        >
-          <Typography
-            variant="body2"
-            sx={{
+    <Tooltip title="Font Size" arrow>
+      <FormControl size="small" sx={{ minWidth: 80 }}>
+        <Select
+          value={getCurrentFontSize()}
+          onChange={handleFontSizeChange}
+          displayEmpty
+          sx={{
+            fontSize: "12px",
+            height: "32px",
+            "& .MuiSelect-select": {
+              padding: "6px 8px",
               fontSize: "12px",
-              fontWeight: 500,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: "40px",
-              flex: 1,
-            }}
-          >
-            {getCurrentFontSize()}
-          </Typography>
-          <MdArrowDropDown style={{ marginLeft: "4px", fontSize: "16px" }} />
-        </IconButton>
-      </Tooltip>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-        PaperProps={{
-          style: {
-            maxHeight: 300,
-            width: "120px",
-          },
-        }}
-      >
-        {FONT_SIZES.map((size) => (
-          <MenuItem
-            key={size.value}
-            onClick={() => handleFontSizeChange(size.value)}
-            sx={{
-              fontSize: "14px", // Display all sizes in normal text
-              fontFamily: "Inter, sans-serif",
-              "&:hover": {
-                backgroundColor: "#f5f5f5",
-              },
-            }}
-          >
-            {size.label}
-          </MenuItem>
-        ))}
-      </Menu>
-    </>
+            },
+          }}
+        >
+          {FONT_SIZES.map((size) => (
+            <MenuItem key={size.value} value={size.value}>
+              {size.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Tooltip>
   );
 };
 
