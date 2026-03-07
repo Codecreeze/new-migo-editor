@@ -121,7 +121,7 @@ export const imageNodeStyles = {
   imgSelected: {
     width: "100%",
     height: "100%",
-    objectFit: "contain",
+    objectFit: "cover",
     borderRadius: "4px",
     display: "block",
     border: "2px solid #3b82f6",
@@ -131,7 +131,7 @@ export const imageNodeStyles = {
   imgUnselected: {
     width: "100%",
     height: "100%",
-    objectFit: "contain",
+    objectFit: "cover",
     borderRadius: "4px",
     display: "block",
     border: "2px solid transparent",

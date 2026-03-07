@@ -5,7 +5,7 @@ import { imageNodeStyles } from "./imageNodeStyles";
 
 export default function ImageNodeView(props: NodeViewProps) {
   const { node, updateAttributes, selected } = props;
-  const { src, alt, width, height, rotate, flipH, flipV, align } = node.attrs;
+  const { src, alt, width, height, flipH, flipV, align } = node.attrs;
   const [isSelected, setIsSelected] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const figureRef = useRef<HTMLElement>(null);
@@ -14,12 +14,8 @@ export default function ImageNodeView(props: NodeViewProps) {
     setIsSelected(selected);
   }, [selected]);
 
-  // Apply CSS transform for rotation and flipping
-  const transform = [
-    rotate ? `rotate(${rotate}deg)` : "",
-    flipH ? "scaleX(-1)" : "",
-    flipV ? "scaleY(-1)" : "",
-  ]
+  // Apply CSS transform for flipping
+  const transform = [flipH ? "scaleX(-1)" : "", flipV ? "scaleY(-1)" : ""]
     .filter(Boolean)
     .join(" ");
 
@@ -157,13 +153,8 @@ export default function ImageNodeView(props: NodeViewProps) {
     // For transformed images, we need to calculate the actual resize direction
     // based on the visual orientation, not the DOM orientation
 
-    // Apply rotation transformation to deltas
-    const rotRad = (rotate * Math.PI) / 180;
-    const cos = Math.cos(rotRad);
-    const sin = Math.sin(rotRad);
-
-    let transformedDeltaX = deltaX * cos + deltaY * sin;
-    let transformedDeltaY = -deltaX * sin + deltaY * cos;
+    let transformedDeltaX = deltaX;
+    let transformedDeltaY = deltaY;
 
     // Apply flip transformations
     if (flipH) transformedDeltaX = -transformedDeltaX;
@@ -172,8 +163,8 @@ export default function ImageNodeView(props: NodeViewProps) {
     return { deltaX: transformedDeltaX, deltaY: transformedDeltaY };
   };
 
-  // Calculate rotated cursor based on rotation and flip state
-  const getRotatedCursor = (originalCursor: string) => {
+  // Calculate flipped cursor based on flip state
+  const getFlippedCursor = (originalCursor: string) => {
     // Cursor mapping for corner handles only
     const cursorMap: { [key: string]: string[] } = {
       "nw-resize": ["nw-resize", "ne-resize", "se-resize", "sw-resize"],
@@ -182,16 +173,11 @@ export default function ImageNodeView(props: NodeViewProps) {
       "sw-resize": ["sw-resize", "nw-resize", "ne-resize", "se-resize"],
     };
 
-    // Calculate rotation steps (0, 90, 180, 270 degrees)
-    const rotationSteps = Math.round(rotate / 90) % 4;
-    const normalizedSteps =
-      rotationSteps < 0 ? rotationSteps + 4 : rotationSteps;
-
     // Get base cursor from mapping
     const cursors = cursorMap[originalCursor];
     if (!cursors) return originalCursor;
 
-    let cursorIndex = normalizedSteps;
+    let cursorIndex = 0;
 
     // Adjust for flips
     if (flipH && !flipV) {
@@ -214,7 +200,7 @@ export default function ImageNodeView(props: NodeViewProps) {
   const getHandleStyles = (baseStyle: any) => {
     const isAtLimit = isAtMaxWidth && isAtMaxHeight;
     const originalCursor = baseStyle.cursor;
-    const rotatedCursor = getRotatedCursor(originalCursor);
+    const rotatedCursor = getFlippedCursor(originalCursor);
 
     return {
       ...imageNodeStyles.resizeHandle,
@@ -228,14 +214,11 @@ export default function ImageNodeView(props: NodeViewProps) {
     ? imageNodeStyles.imgSelected
     : imageNodeStyles.imgUnselected;
 
-  const appliedWidth = `${Math.min(height, 800)}`;
-  const appliedHeight = `${Math.min(width, 720)}`;
+  const appliedWidth = `${Math.min(width, 720)}`;
+  const appliedHeight = `${Math.min(height, 800)}`;
 
   const newWidth = appliedWidth !== "NaN" ? `${appliedWidth}px` : "auto";
   const newHeight = appliedHeight !== "NaN" ? `${appliedHeight}px` : "auto";
-
-  console.log("newWidth", newWidth);
-  console.log("newHeight", newHeight);
 
   return (
     <NodeViewWrapper

@@ -1,7 +1,6 @@
 import { BubbleMenu } from "@tiptap/react/menus";
 import { isNodeSelection } from "@tiptap/core";
 import {
-  MdRotateRight,
   MdFormatAlignLeft,
   MdFormatAlignCenter,
   MdFormatAlignRight,
@@ -52,23 +51,6 @@ const ImageBubbleMenu = ({ editor }: ImageBubbleMenuProps) => {
     if (node.type.name !== "imageExtended") return;
 
     editor.chain().focus().updateAttributes("imageExtended", { align }).run();
-  };
-
-  const handleRotate = () => {
-    const { selection } = editor.state;
-    if (!isNodeSelection(selection)) return;
-
-    const node = selection.node;
-    if (node.type.name !== "imageExtended") return;
-
-    const current = node.attrs.rotate ?? 0;
-    const next = (current + 90) % 360;
-
-    editor
-      .chain()
-      .focus()
-      .updateAttributes("imageExtended", { rotate: next })
-      .run();
   };
 
   const handleFlip = (axis: "horizontal" | "vertical") => {
@@ -167,11 +149,6 @@ const ImageBubbleMenu = ({ editor }: ImageBubbleMenuProps) => {
         <Divider orientation="vertical" flexItem />
 
         {/* Transform Options */}
-        <Tooltip title="Rotate">
-          <IconButton size="small" onClick={handleRotate}>
-            <MdRotateRight />
-          </IconButton>
-        </Tooltip>
         <Tooltip title="Flip horizontal">
           <IconButton size="small" onClick={() => handleFlip("horizontal")}>
             <LuFlipHorizontal />
