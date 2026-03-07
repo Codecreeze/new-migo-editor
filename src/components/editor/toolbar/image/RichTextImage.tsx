@@ -16,7 +16,7 @@ import {
 import { RiImageAiLine } from "react-icons/ri";
 import { MdClose } from "react-icons/md";
 import { useRichTextEditor } from "../RichTextProvider";
-import EnhancedImageBubbleMenu from "../../extensions/EnhancedImageBubbleMenu";
+import ImageBubbleMenu from "./ImageBubbleMenu";
 
 export const RichTextImage: React.FC = () => {
   const editor = useRichTextEditor();
@@ -35,7 +35,11 @@ export const RichTextImage: React.FC = () => {
       reader.onload = (e) => {
         const base64 = e.target?.result as string;
         // Insert image directly into editor
-        editor.chain().focus().setImageExtended({ src: base64, alt: imageAlt }).run();
+        editor
+          .chain()
+          .focus()
+          .setImageExtended({ src: base64, alt: imageAlt })
+          .run();
         // Close dialog and reset
         setDialogOpen(false);
         setImageUrl("");
@@ -47,7 +51,11 @@ export const RichTextImage: React.FC = () => {
 
   const handleInsertImage = () => {
     if (imageUrl) {
-      editor.chain().focus().setImageExtended({ src: imageUrl, alt: imageAlt }).run();
+      editor
+        .chain()
+        .focus()
+        .setImageExtended({ src: imageUrl, alt: imageAlt })
+        .run();
       setDialogOpen(false);
       setImageUrl("");
       setImageAlt("");
@@ -361,7 +369,7 @@ export const RichTextImage: React.FC = () => {
           </Box>
         </DialogContent>
       </Dialog>
-      {editor && <EnhancedImageBubbleMenu editor={editor} />}
+      {editor && <ImageBubbleMenu editor={editor} />}
     </>
   );
 };

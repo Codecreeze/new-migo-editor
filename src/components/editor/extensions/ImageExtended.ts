@@ -26,8 +26,8 @@ export default Node.create<ImageExtendedOptions>({
       alt: { default: '' },
 
       // size
-      width: { default: null },
-      height: { default: null },
+      width: { default: "720px" },
+      height: { default: "480px" },
 
       // alignment
       align: { 

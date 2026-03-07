@@ -43,8 +43,14 @@ export default function ImageNodeView(props: NodeViewProps) {
     const MIN_HEIGHT = 100;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = e.clientX - startX;
-      const deltaY = e.clientY - startY;
+      const rawDeltaX = e.clientX - startX;
+      const rawDeltaY = e.clientY - startY;
+
+      // Get transform-aware deltas
+      const { deltaX, deltaY } = getTransformAwareDirection(
+        rawDeltaX,
+        rawDeltaY,
+      );
 
       let newWidth = startWidth;
       let newHeight = startHeight;
@@ -146,12 +152,74 @@ export default function ImageNodeView(props: NodeViewProps) {
     }
   };
 
+  // Calculate transform-aware resize direction
+  const getTransformAwareDirection = (deltaX: number, deltaY: number) => {
+    // For transformed images, we need to calculate the actual resize direction
+    // based on the visual orientation, not the DOM orientation
+
+    // Apply rotation transformation to deltas
+    const rotRad = (rotate * Math.PI) / 180;
+    const cos = Math.cos(rotRad);
+    const sin = Math.sin(rotRad);
+
+    let transformedDeltaX = deltaX * cos + deltaY * sin;
+    let transformedDeltaY = -deltaX * sin + deltaY * cos;
+
+    // Apply flip transformations
+    if (flipH) transformedDeltaX = -transformedDeltaX;
+    if (flipV) transformedDeltaY = -transformedDeltaY;
+
+    return { deltaX: transformedDeltaX, deltaY: transformedDeltaY };
+  };
+
+  // Calculate rotated cursor based on rotation and flip state
+  const getRotatedCursor = (originalCursor: string) => {
+    // Cursor mapping for corner handles only
+    const cursorMap: { [key: string]: string[] } = {
+      "nw-resize": ["nw-resize", "ne-resize", "se-resize", "sw-resize"],
+      "ne-resize": ["ne-resize", "se-resize", "sw-resize", "nw-resize"],
+      "se-resize": ["se-resize", "sw-resize", "nw-resize", "ne-resize"],
+      "sw-resize": ["sw-resize", "nw-resize", "ne-resize", "se-resize"],
+    };
+
+    // Calculate rotation steps (0, 90, 180, 270 degrees)
+    const rotationSteps = Math.round(rotate / 90) % 4;
+    const normalizedSteps =
+      rotationSteps < 0 ? rotationSteps + 4 : rotationSteps;
+
+    // Get base cursor from mapping
+    const cursors = cursorMap[originalCursor];
+    if (!cursors) return originalCursor;
+
+    let cursorIndex = normalizedSteps;
+
+    // Adjust for flips
+    if (flipH && !flipV) {
+      // Horizontal flip: swap left-right
+      const flipMap: { [key: number]: number } = { 0: 1, 1: 0, 2: 3, 3: 2 };
+      cursorIndex = flipMap[cursorIndex] ?? cursorIndex;
+    } else if (flipV && !flipH) {
+      // Vertical flip: swap top-bottom
+      const flipMap: { [key: number]: number } = { 0: 3, 1: 2, 2: 1, 3: 0 };
+      cursorIndex = flipMap[cursorIndex] ?? cursorIndex;
+    } else if (flipH && flipV) {
+      // Both flips: 180 degree rotation
+      cursorIndex = (cursorIndex + 2) % 4;
+    }
+
+    return cursors[cursorIndex] || originalCursor;
+  };
+
   // Get handle styles with rotation consideration
   const getHandleStyles = (baseStyle: any) => {
     const isAtLimit = isAtMaxWidth && isAtMaxHeight;
+    const originalCursor = baseStyle.cursor;
+    const rotatedCursor = getRotatedCursor(originalCursor);
+
     return {
       ...imageNodeStyles.resizeHandle,
       ...baseStyle,
+      cursor: isAtLimit ? "not-allowed" : rotatedCursor,
       ...(isAtLimit ? imageNodeStyles.resizeHandleDisabled : {}),
     };
   };
@@ -159,6 +227,15 @@ export default function ImageNodeView(props: NodeViewProps) {
   const imageStyles = isSelected
     ? imageNodeStyles.imgSelected
     : imageNodeStyles.imgUnselected;
+
+  const appliedWidth = `${Math.min(height, 800)}`;
+  const appliedHeight = `${Math.min(width, 720)}`;
+
+  const newWidth = appliedWidth !== "NaN" ? `${appliedWidth}px` : "auto";
+  const newHeight = appliedHeight !== "NaN" ? `${appliedHeight}px` : "auto";
+
+  console.log("newWidth", newWidth);
+  console.log("newHeight", newHeight);
 
   return (
     <NodeViewWrapper
@@ -177,8 +254,8 @@ export default function ImageNodeView(props: NodeViewProps) {
       <Box
         sx={{
           ...imageNodeStyles.imageContainer,
-          width: width ? `${Math.min(width, 720)}px` : "auto",
-          height: height ? `${Math.min(height, 800)}px` : "auto",
+          width: newWidth,
+          height: newHeight,
           transform,
           transformOrigin: "center",
         }}
@@ -213,23 +290,7 @@ export default function ImageNodeView(props: NodeViewProps) {
               onMouseDown={(e) => handleMouseDown(e, "bottom-right")}
             />
 
-            {/* Edge handles */}
-            <Box
-              sx={getHandleStyles(imageNodeStyles.handleTop)}
-              onMouseDown={(e) => handleMouseDown(e, "top")}
-            />
-            <Box
-              sx={getHandleStyles(imageNodeStyles.handleBottom)}
-              onMouseDown={(e) => handleMouseDown(e, "bottom")}
-            />
-            <Box
-              sx={getHandleStyles(imageNodeStyles.handleLeft)}
-              onMouseDown={(e) => handleMouseDown(e, "left")}
-            />
-            <Box
-              sx={getHandleStyles(imageNodeStyles.handleRight)}
-              onMouseDown={(e) => handleMouseDown(e, "right")}
-            />
+            {/* Edge handles removed - only corner handles for cleaner interaction */}
           </React.Fragment>
         )}
       </Box>

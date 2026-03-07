@@ -29,7 +29,6 @@ export const imageNodeStyles = {
 
   imageSelected: {
     border: "2px solid #3b82f6",
-    boxShadow: "0 0 0 1px rgba(59, 130, 246, 0.3)",
   } as SxProps<Theme>,
 
   imageUnselected: {
@@ -41,10 +40,8 @@ export const imageNodeStyles = {
     position: "absolute",
     width: "8px",
     height: "8px",
-    bgcolor: "#3b82f6",
-    borderRadius: "2px",
-    border: "1px solid white",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+    bgcolor: "orange",
+    borderRadius: "50%",
     zIndex: 10,
   } as SxProps<Theme>,
 

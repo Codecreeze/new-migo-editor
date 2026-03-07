@@ -1,26 +1,27 @@
-import { Editor, isNodeSelection } from "@tiptap/core"; // ← import isNodeSelection here!
 import { BubbleMenu } from "@tiptap/react/menus";
-import { Box, IconButton, Tooltip, Divider, Button } from "@mui/material";
+import { isNodeSelection } from "@tiptap/core";
 import {
-  MdDelete,
+  MdRotateRight,
   MdFormatAlignLeft,
   MdFormatAlignCenter,
   MdFormatAlignRight,
-  MdRotateRight,
 } from "react-icons/md";
-import { TbFlipVertical, TbFlipHorizontal } from "react-icons/tb";
+import { LuFlipHorizontal, LuFlipVertical } from "react-icons/lu";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { Box, IconButton, Divider, Tooltip, Button } from "@mui/material";
+import type { Editor } from "@tiptap/react";
 
-interface Props {
+interface ImageBubbleMenuProps {
   editor: Editor;
 }
 
-const ImageBubbleMenu = ({ editor }: Props) => {
+const ImageBubbleMenu = ({ editor }: ImageBubbleMenuProps) => {
   if (!editor) return null;
 
   const sizeOptions = [
-    { label: "S", value: { width: 240, height: "auto" } }, // better defaults (height auto prevents distortion)
-    { label: "M", value: { width: 480, height: "auto" } },
-    { label: "L", value: { width: 720, height: "auto" } },
+    { label: "S", value: { width: 240, height: "240" }, name: "Small" },
+    { label: "M", value: { width: 480, height: "auto" }, name: "Medium" },
+    { label: "L", value: { width: 720, height: "auto" }, name: "Large" },
   ];
 
   const handleSizeChange = (size: {
@@ -31,12 +32,12 @@ const ImageBubbleMenu = ({ editor }: Props) => {
     if (!isNodeSelection(selection)) return;
 
     const node = selection.node;
-    if (node.type.name !== "image") return; // remove video if not using it
+    if (node.type.name !== "imageExtended") return;
 
     editor
       .chain()
       .focus()
-      .updateAttributes("image", {
+      .updateAttributes("imageExtended", {
         width: size.width,
         height: size.height,
       })
@@ -48,9 +49,9 @@ const ImageBubbleMenu = ({ editor }: Props) => {
     if (!isNodeSelection(selection)) return;
 
     const node = selection.node;
-    if (node.type.name !== "image") return;
+    if (node.type.name !== "imageExtended") return;
 
-    editor.chain().focus().updateAttributes("image", { align }).run();
+    editor.chain().focus().updateAttributes("imageExtended", { align }).run();
   };
 
   const handleRotate = () => {
@@ -58,12 +59,16 @@ const ImageBubbleMenu = ({ editor }: Props) => {
     if (!isNodeSelection(selection)) return;
 
     const node = selection.node;
-    if (node.type.name !== "image") return;
+    if (node.type.name !== "imageExtended") return;
 
-    const current = node.attrs.rotation ?? 0;
+    const current = node.attrs.rotate ?? 0;
     const next = (current + 90) % 360;
 
-    editor.chain().focus().updateAttributes("image", { rotation: next }).run();
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("imageExtended", { rotate: next })
+      .run();
   };
 
   const handleFlip = (axis: "horizontal" | "vertical") => {
@@ -71,7 +76,7 @@ const ImageBubbleMenu = ({ editor }: Props) => {
     if (!isNodeSelection(selection)) return;
 
     const node = selection.node;
-    if (node.type.name !== "image") return;
+    if (node.type.name !== "imageExtended") return;
 
     const key = axis === "horizontal" ? "flipH" : "flipV";
     const current = !!node.attrs[key];
@@ -79,7 +84,7 @@ const ImageBubbleMenu = ({ editor }: Props) => {
     editor
       .chain()
       .focus()
-      .updateAttributes("image", { [key]: !current })
+      .updateAttributes("imageExtended", { [key]: !current })
       .run();
   };
 
@@ -90,21 +95,18 @@ const ImageBubbleMenu = ({ editor }: Props) => {
   return (
     <BubbleMenu
       editor={editor}
-      pluginKey="image-bubble-menu" // unique key – good practice
+      pluginKey="enhanced-image-bubble-menu"
+      shouldShow={({ state }: any) => {
+        const { selection } = state;
+        // Only show when a full node selection exists for imageExtended
+        return (
+          isNodeSelection(selection) &&
+          selection.node.type.name === "imageExtended"
+        );
+      }}
       options={{
         placement: "top",
         offset: 8,
-      }}
-      shouldShow={({ editor, state }) => {
-        const { selection } = state;
-
-        // Core condition: show only when whole image node is selected
-        return (
-          isNodeSelection(selection) && selection.node.type.name === "image"
-        );
-
-        // Alternative (more lenient) version if you also want to show when cursor is *inside* image:
-        // return editor.isActive("image");
       }}
     >
       <Box
@@ -118,21 +120,24 @@ const ImageBubbleMenu = ({ editor }: Props) => {
           boxShadow: 4,
           border: "1px solid",
           borderColor: "divider",
-          pointerEvents: "all", // important when inside complex layouts
+          pointerEvents: "all",
         }}
       >
-        {/* Size */}
+        {/* Size Options */}
         <Box sx={{ display: "flex", gap: 0.25 }}>
           {sizeOptions.map((opt) => (
-            <Tooltip
-              key={opt.label}
-              title={`${opt.label} · ${opt.value.width}px wide`}
-            >
+            <Tooltip key={opt.label} title={opt.name}>
               <Button
                 size="small"
                 variant="text"
                 onClick={() => handleSizeChange(opt.value)}
-                sx={{ minWidth: 32, fontSize: "13px", fontWeight: 600, px: 1 }}
+                sx={{
+                  minWidth: 32,
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  px: 1,
+                  color: "text.primary",
+                }}
               >
                 {opt.label}
               </Button>
@@ -142,18 +147,18 @@ const ImageBubbleMenu = ({ editor }: Props) => {
 
         <Divider orientation="vertical" flexItem />
 
-        {/* Alignment */}
-        <Tooltip title="Align left">
+        {/* Alignment Options */}
+        <Tooltip title="Align Left">
           <IconButton size="small" onClick={() => handleAlignment("left")}>
             <MdFormatAlignLeft />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Align center">
+        <Tooltip title="Align Center">
           <IconButton size="small" onClick={() => handleAlignment("center")}>
             <MdFormatAlignCenter />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Align right">
+        <Tooltip title="Align Right">
           <IconButton size="small" onClick={() => handleAlignment("right")}>
             <MdFormatAlignRight />
           </IconButton>
@@ -161,29 +166,29 @@ const ImageBubbleMenu = ({ editor }: Props) => {
 
         <Divider orientation="vertical" flexItem />
 
-        {/* Rotate + Flip */}
-        <Tooltip title="Rotate 90° right">
+        {/* Transform Options */}
+        <Tooltip title="Rotate">
           <IconButton size="small" onClick={handleRotate}>
             <MdRotateRight />
           </IconButton>
         </Tooltip>
         <Tooltip title="Flip horizontal">
           <IconButton size="small" onClick={() => handleFlip("horizontal")}>
-            <TbFlipHorizontal />
+            <LuFlipHorizontal />
           </IconButton>
         </Tooltip>
         <Tooltip title="Flip vertical">
           <IconButton size="small" onClick={() => handleFlip("vertical")}>
-            <TbFlipVertical />
+            <LuFlipVertical />
           </IconButton>
         </Tooltip>
 
         <Divider orientation="vertical" flexItem />
 
         {/* Delete */}
-        <Tooltip title="Delete image">
+        <Tooltip title="Delete">
           <IconButton size="small" color="error" onClick={handleDelete}>
-            <MdDelete />
+            <RiDeleteBin6Line />
           </IconButton>
         </Tooltip>
       </Box>
